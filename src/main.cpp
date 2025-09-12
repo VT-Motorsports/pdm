@@ -5,6 +5,7 @@
  */
 
 #include "CanInitializer.h"
+#include "PedalSensors.h"
 #include <stdio.h>
 #include <sys/_intsup.h>
 #include <zephyr/drivers/gpio.h>
@@ -27,51 +28,7 @@ const int rtds_horn_pin = 21;
 const int custom_pedal_pin = A14;
 
 
-// Class for the pedals contains how to read pedal positions and check Open Circuit and Short Circuit faults
-struct pedalSensor {
-    const int inputPin;
-    const int zeroPos;
-    const int fullPos;
-    const int onLedPin;
-    const int ocLedPin;
-    const int scLedPin;
-}
 
-
-float pedalPercentage(pedalSensor pedal) const {
-    float percent = ((float) pedal.analogRead(pedal.inputPin) - pedal.zeroPos) / (pedal.fullPos - pedal.zeroPos);
-            if (percent < 0.0f) {
-                percent = 0.0f;
-            } else if (percent > 1.0f) {
-                percent = 1.0f;
-            }
-            return percent;
-}
-
-// Checks for a Short Circuit by reading the value of the sensor and comparing it to the threshold defined above
-bool checkOpenCircuit(pedalSensor pedal) const {
-    bool isOpenCircuit = pedal.analogRead(pedal.inputPin) < pedal.ocThreshold;
-    digitalWrite(pedal.ocLedPin, isOpenCircuit);
-    #ifdef DEBUGGING
-    printf("Pedal %d: Open Circuit %s\n", pedal.inputPin, isOpenCircuit ? "detected" : "not detected");
-    #endif
-    return isOpenCircuit;
-}
-
-// Checks for a Short Circuit by reading the value of the sensor and comparing it to the threshold defined above
-bool checkShortCircuit(PedalSensor pedal) const {
-    bool isShortCircuit = analogRead(pdeal.inputPin) > pedal.scThreshold;
-    digitalWrite(pedal.scLedPin, isShortCircuit);
-    #ifdef DEBUGGING
-    printf("Pedal %d: Short Circuit %s\n", pedal.inputPin, isShortCircuit ? "detected" : "not detected");
-    #endif
-    return isShortCircuit;
-}
-
-// Checks both faults for a pedal
-bool checkRangeFaults(pedalSensor pedal) const {
-      return checkOpenCircuit(pedal) || checkShortCircuit(pedal);
-    }
 
 // Pedal sensor1 WRITE DOWN RIGHT OR LEFT WHEN WE FIGURE IT OUT also update values
 const pedalSensor p1 = {
