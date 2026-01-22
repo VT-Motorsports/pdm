@@ -9,7 +9,7 @@ LOG_MODULE_REGISTER(soc_health, LOG_LEVEL_INF);
  constexpr int DIAG_THREAD_PRIORITY  = 5;
 
 
-constexpr int health_task_period = 100; //in ms 
+constexpr int health_task_period = 1000; //in ms 
 
 
 void diagnostics_thread(void*,void*,void*){

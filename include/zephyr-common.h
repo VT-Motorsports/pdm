@@ -16,5 +16,7 @@
 #include "syscalls/can.h"
 #include <zephyr/debug/cpu_load.h>
 #include <zephyr/sys/printk.h>
+#include <zephyr/drivers/adc.h>
+
 
 #include "globals.h"

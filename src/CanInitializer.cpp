@@ -1,6 +1,7 @@
 #include "zephyr-common.h"
 #include "globals.h"
 #include "zephyr/drivers/can.h"
+#include "zephyr/kernel.h"
 
 LOG_MODULE_REGISTER(canInitializer, LOG_LEVEL_INF);
 
@@ -59,14 +60,18 @@ uint8_t can_init() {
         return static_cast<uint8_t>(ret);
     }
 
-    LOG_INF("Setting LOOPBACK MODE"); 
-    ret = can_set_mode(can1, CAN_MODE_LOOPBACK);
-    if (ret) {
-        LOG_ERR("Failed to set CAN loopback mode: %d", ret);
-    }
-    else{
-        LOG_INF("Loopback Set"); 
-    }
+
+    // LOG_INF("Setting LOOPBACK MODE"); 
+    // ret = can_set_mode(can1, CAN_MODE_LOOPBACK);
+    // if (ret) {
+    //     LOG_ERR("Failed to set CAN loopback mode: %d", ret);
+    // }
+    // else{
+    //     LOG_INF("Loopback Set"); 
+    // }
+
+
+    LOG_INF("CAN mode flags: 0x%x", can_get_mode(can1));
 
     LOG_INF("Starting CAN1...");
     ret = can_start(can1);
@@ -88,23 +93,23 @@ uint8_t can_init() {
     }
     LOG_INF("CAN1 initialization complete.");
 
-    const struct can_filter match_all_rx = {
+	const struct can_filter match_all_rx = {
         .id = 0x000,
-        .mask = 0x000,
-        .flags = 0
-    };
-
+        .mask = ~CAN_STD_ID_MASK,
+		.flags = 0,
+	};
     int test_msgq_id = can_add_rx_filter_msgq(can1, &can1_rx_test_msgq, &match_all_rx);
     
     if (test_msgq_id < 0) {
         LOG_ERR("Failed to add RX MSGQ: %d", test_msgq_id);
     } else {
         LOG_INF("RX MSGQ installed successfully (id=%d)", test_msgq_id);
-        LOG_INF("Waiting to Recieve first Message"); 
     }
 
+    LOG_INF("Waiting to Recieve first Message"); 
+
     struct can_frame rx_frame;
-    ret = k_msgq_get(&can1_rx_test_msgq, &rx_frame, K_FOREVER);
+    ret = k_msgq_get(&can1_rx_test_msgq, &rx_frame,K_FOREVER);
     if (ret == 0) {
         LOG_INF("Received first CAN frame:");
         LOG_INF("  ID: 0x%x", rx_frame.id);
