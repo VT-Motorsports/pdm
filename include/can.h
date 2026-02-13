@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdint>
+#include "vehicle_state.h"
 #include <zephyr/drivers/can.h>
 #include <zephyr/kernel.h>
 
@@ -11,12 +11,15 @@ class CanBus
     uint32_t sample_point_;
     bool initialized_;
     bool started_;
+    VehicleState *vehicle_;
+    uint32_t frames_rec;
+    uint32_t frames_sent;
 
-    static void can1_rx_isr(const struct device *dev, struct can_frame *frame, void *user_data);
-    static void can2_rx_isr(const struct device *dev, struct can_frame *frame, void *user_data);
+    static void can1_rx_isr(const struct device *dev, struct can_frame *frame, void *self_ptr);
+    static void can2_rx_isr(const struct device *dev, struct can_frame *frame, void *self_ptr);
 
   public:
-    CanBus();
+    CanBus(VehicleState *vehicle);
 
     int init(const struct device *dev, uint32_t bitrate = 1000000, uint32_t sample_point = 875);
     int start();

@@ -4,3 +4,4 @@ TabWidth: 4
 UseTab: Never
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: None
+SortIncludes: false

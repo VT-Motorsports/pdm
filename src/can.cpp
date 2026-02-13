@@ -3,20 +3,25 @@
 #include <zephyr/logging/log.h>
 
 #include "stm32h753xx.h"
+#include "vehicle_state.h"
 #include "zephyr/drivers/can.h"
 
 LOG_MODULE_REGISTER(can);
 
-CanBus::CanBus() : dev_(nullptr), bitrate_(0), sample_point_(0), initialized_(false), started_(false)
+CanBus::CanBus(VehicleState *vehicle)
+    : dev_(nullptr), bitrate_(0), sample_point_(0), initialized_(false), started_(false), vehicle_(vehicle)
 {
 }
 
-void CanBus::can1_rx_isr(const struct device *dev, struct can_frame *frame, void *user_data)
+void CanBus::can1_rx_isr(const struct device *dev, struct can_frame *frame, void *self_ptr)
 {
+    CanBus *bus = static_cast<CanBus *>(self_ptr);
+    bus->frames_rec++;
+
     LOG_INF("can1callback");
 }
 
-void CanBus::can2_rx_isr(const struct device *dev, struct can_frame *frame, void *user_data)
+void CanBus::can2_rx_isr(const struct device *dev, struct can_frame *frame, void *self_ptr)
 {
     LOG_INF("can2callback");
 }
