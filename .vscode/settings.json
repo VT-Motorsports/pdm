@@ -4,12 +4,15 @@
     // Disable default IntelliSense to avoid conflict
     "editor.semanticHighlighting.enabled": true,
 
-
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "never"
+    },
     "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.errorSquiggles": "disabled",
 
     // Still provide compile_commands.json in case anything else looks for it
     "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.clang_format_sortIncludes": false,
 
     // CMake Tools extension behavior
     "cmake.configureOnOpen": false,
