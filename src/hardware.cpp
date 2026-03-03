@@ -9,6 +9,8 @@
 
 LOG_MODULE_REGISTER(hardware);
 
+/* ========================================================================== */
+
 int Hardware::init()
 {
     LOG_INF("Initializing hardware...");
@@ -35,169 +37,191 @@ int Hardware::init()
     return 0;
 }
 
-Hardware::Hardware(VehicleState *state) : can1(state), can2(state), vehicle(state)
+Hardware::Hardware(VehicleState *state) : can1(state), vehicle(state)
 {
 }
 
+/* ========================================================================== */
+/* ADC                                                                         */
+/* ========================================================================== */
+
 int Hardware::initializeADCs()
 {
-    LOG_INF("Initializing hardware...");
+    LOG_INF("Initializing ADCs...");
 
-    // Get ADC device
-    adc_dev_ = DEVICE_DT_GET(DT_NODELABEL(adc1));
-    if (!device_is_ready(adc_dev_))
+    /* --- ADC1 ------------------------------------------------------------- */
+    /*
+     * DTS channel -> physical pin -> signal:
+     *   channel@0 (INP18): PA4  -> I_10A_Limit
+     *   channel@1 (INP19): PA5  -> I_5A_Limit
+     *   channel@2 (INP5):  PB1  -> I_Pump2
+     *   channel@3 (INP11): PC1  -> I_Rad1_Prot
+     *   channel@4 (INP4):  PC4  -> I_Pump1
+     *   channel@5 (INP8):  PC5  -> I_1a_Limit1
+     *   channel@6 (INP10):  PC0  -> I_1a_Limit2
+     *
+     * init() takes the INP number, which must match
+     * zephyr,input-positive in the DTS channel node.
+     */
+    adc1_dev_ = DEVICE_DT_GET(DT_NODELABEL(adc1));
+    if (!device_is_ready(adc1_dev_))
     {
         LOG_ERR("ADC device adc1 not ready");
         return -1;
     }
 
-    /*
-     * Devicetree -> physical pin mapping (from your DTS + pinout):
-     *  chan0: PA0  -> ADC1_INP16 (reg = 16)
-     *  chan1: PA1  -> ADC1_INP17 (reg = 17)
-     *  chan2: PA2  -> ADC1_INP14 (reg = 14)
-     *  chan3: PA3  -> ADC1_INP15 (reg = 15)
-     *  chan4: PA4  -> ADC1_INP18 (reg = 18)
-     *  chan5: PA5  -> ADC1_INP19 (reg = 19)
-     *  chan6: PA6  -> ADC1_INP3  (reg = 3)
-     *  chan7: PA7  -> ADC1_INP7  (reg = 7)
-     *
-     * Note: these values must match the DTS channel@N { reg = <...>; } entries,
-     * not "channel@N" indices.
-     */
-
-    if (adc_chan0.init(adc_dev_, 16) != 0)
+    if (i_10a_limit.init(adc1_dev_, 18) != 0)   /* PA4  - INP18 */
     {
-        LOG_ERR("Failed to init adc_chan0 (PA0/INP16)");
+        LOG_ERR("Failed to init i_10a_limit (PA4/INP18)");
         return -10;
     }
-    if (adc_chan1.init(adc_dev_, 17) != 0)
+    if (i_5a_limit.init(adc1_dev_, 19) != 0)     /* PA5  - INP19 */
     {
-        LOG_ERR("Failed to init adc_chan1 (PA1/INP17)");
+        LOG_ERR("Failed to init i_5a_limit (PA5/INP19)");
         return -11;
     }
-    if (adc_chan2.init(adc_dev_, 14) != 0)
+    if (i_pump2.init(adc1_dev_, 5) != 0)          /* PB1  - INP5  */
     {
-        LOG_ERR("Failed to init adc_chan2 (PA2/INP14)");
+        LOG_ERR("Failed to init i_pump2 (PB1/INP5)");
         return -12;
     }
-    if (adc_chan3.init(adc_dev_, 15) != 0)
+    if (i_rad1_prot.init(adc1_dev_, 11) != 0)    /* PC1  - INP11 */
     {
-        LOG_ERR("Failed to init adc_chan3 (PA3/INP15)");
+        LOG_ERR("Failed to init i_rad1_prot (PC1/INP11)");
         return -13;
     }
-    if (adc_chan4.init(adc_dev_, 18) != 0)
+    if (i_pump1.init(adc1_dev_, 4) != 0)          /* PC4  - INP4  */
     {
-        LOG_ERR("Failed to init adc_chan4 (PA4/INP18)");
+        LOG_ERR("Failed to init i_pump1 (PC4/INP4)");
         return -14;
     }
-    if (adc_chan5.init(adc_dev_, 19) != 0)
+    if (i_1a_limit1.init(adc1_dev_, 8) != 0)     /* PC5  - INP8  */
     {
-        LOG_ERR("Failed to init adc_chan5 (PA5/INP19)");
+        LOG_ERR("Failed to init i_1a_limit1 (PC5/INP8)");
         return -15;
     }
-    if (adc_chan6.init(adc_dev_, 3) != 0)
+        if (i_1a_limit2.init(adc1_dev_, 10) != 0)     /* PC0  - INP10  */
     {
-        LOG_ERR("Failed to init adc_chan6 (PA6/INP3)");
-        return -16;
-    }
-    if (adc_chan7.init(adc_dev_, 7) != 0)
-    {
-        LOG_ERR("Failed to init adc_chan7 (PA7/INP7)");
-        return -17;
+        LOG_ERR("Failed to init i_1a_limit2 (PC0/INP10)");
+        return -60;
     }
 
-    LOG_INF("Hardware initialized successfully");
+    /* --- ADC3 ------------------------------------------------------------- */
+    /*
+     *   channel@0 (INP0): PC2_C -> I_Rad2_Prot
+     */
+    adc3_dev_ = DEVICE_DT_GET(DT_NODELABEL(adc3));
+    if (!device_is_ready(adc3_dev_))
+    {
+        LOG_ERR("ADC device adc3 not ready");
+        return -2;
+    }
+
+    if (i_rad2_prot.init(adc3_dev_, 0) != 0)     /* PC2_C - INP0 */
+    {
+        LOG_ERR("Failed to init i_rad2_prot (PC2_C/INP0)");
+        return -16;
+    }
+
+    LOG_INF("ADCs initialized");
     return 0;
 }
 
-uint16_t Hardware::getADCValue(uint8_t channel)
-{
-    static AdcChannel *const adc_table[8] = {&adc_chan0, &adc_chan1, &adc_chan2, &adc_chan3,
-                                             &adc_chan4, &adc_chan5, &adc_chan6, &adc_chan7};
-
-    if (channel >= 8)
-    {
-        return -1;
-    }
-
-    return adc_table[channel]->read_raw();
-}
+/* ========================================================================== */
+/* GPIO                                                                        */
+/* ========================================================================== */
 
 int Hardware::initializeGPIOs()
 {
-    // Get GPIO ports
-    gpioe_ = DEVICE_DT_GET(DT_NODELABEL(gpioe));
-    gpioc_ = DEVICE_DT_GET(DT_NODELABEL(gpioc));
-    gpioa_ = DEVICE_DT_GET(DT_NODELABEL(gpioa));
+    LOG_INF("Initializing GPIOs...");
 
-    if (!gpioe_ || !gpioc_ || !gpioa_)
+    /* --- Acquire GPIO port handles ---------------------------------------- */
+    gpioa_ = DEVICE_DT_GET(DT_NODELABEL(gpioa));
+    gpiob_ = DEVICE_DT_GET(DT_NODELABEL(gpiob));
+    gpioc_ = DEVICE_DT_GET(DT_NODELABEL(gpioc));
+    gpiod_ = DEVICE_DT_GET(DT_NODELABEL(gpiod));
+    gpioe_ = DEVICE_DT_GET(DT_NODELABEL(gpioe));
+
+    if (!device_is_ready(gpioa_) || !device_is_ready(gpiob_) ||
+        !device_is_ready(gpioc_) || !device_is_ready(gpiod_) ||
+        !device_is_ready(gpioe_))
     {
-        LOG_ERR("Failed to get GPIO ports");
+        LOG_ERR("One or more GPIO ports not ready");
         return -1;
     }
 
-    // Initialize LEDs (PE2-PE6)
-    if (led_yellow.init(gpioe_, 2, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init led_yellow");
-        return -10;
-    }
-    if (led_orange.init(gpioe_, 3, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init led_orange");
-        return -11;
-    }
-    if (led_red.init(gpioe_, 4, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init led_red");
-        return -12;
-    }
-    if (led_blue.init(gpioe_, 5, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init led_blue");
-        return -13;
-    }
-    if (led_green.init(gpioe_, 6, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init led_green");
-        return -14;
-    }
+    /* --- Status LEDs (PE2–PE6) -------------------------------------------- */
+    if (led_yellow.init(gpioe_, 2,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("led_yellow");   return -10; }
+    if (led_orange.init(gpioe_, 3,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("led_orange");   return -11; }
+    if (led_red.init   (gpioe_, 4,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("led_red");      return -12; }
+    if (led_blue.init  (gpioe_, 5,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("led_blue");     return -13; }
+    if (led_green.init (gpioe_, 6,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("led_green");    return -14; }
 
-    // Initialize control signals
-    if (horn_signal.init(gpioc_, 8, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init horn_signal");
-        return -20;
-    }
-    if (drive_enable.init(gpioc_, 9, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init drive_enable");
-        return -21;
-    }
-    if (air_ctrl.init(gpioa_, 8, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("Failed to init air_ctrl");
-        return -22;
-    }
+    /* --- Power gates ------------------------------------------------------- */
+    /* GPIOA */
+    if (spare_1a_gate.init  (gpioa_, 8,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("spare_1a_gate");   return -20; }
+
+    /* GPIOB */
+    if (spare_5a_gate2.init (gpiob_, 15, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("spare_5a_gate2");  return -21; }
+    if (bspd_gate.init      (gpiob_, 14, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("bspd_gate");       return -22; }
+    if (dash_gate.init      (gpiob_, 13, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("dash_gate");       return -23; }
+    if (pump1_gate.init     (gpiob_, 12, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("pump1_gate");      return -24; }
+    if (rad1_gate.init      (gpiob_, 11, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("rad1_gate");       return -25; }
+    if (fan4_gate.init      (gpiob_, 10, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("fan4_gate");       return -26; }
+    if (pump2_gate.init     (gpiob_, 2,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("pump2_gate");      return -27; }
+
+    /* GPIOC */
+    if (spare_5a_gate.init  (gpioc_, 9,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("spare_5a_gate");   return -28; }
+
+    /* GPIOD */
+    if (spare_1a_gate2.init (gpiod_, 7,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("spare_1a_gate2");  return -29; }
+    if (strain_gate.init    (gpiod_, 6,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("strain_gate");     return -30; }
+    if (emeter_gate.init    (gpiod_, 5,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("emeter_gate");     return -31; }
+    if (bms_gate.init       (gpiod_, 4,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("bms_gate");        return -32; }
+    if (imd_gate.init       (gpiod_, 3,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("imd_gate");        return -33; }
+    if (sd_gate.init        (gpiod_, 2,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("sd_gate");         return -34; }
+    if (rad2_gate.init      (gpiod_, 1,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("rad2_gate");       return -35; }
+
+    /* GPIOE */
+    if (fan3_gate.init      (gpioe_, 15, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("fan3_gate");       return -36; }
+    if (fan2_gate.init      (gpioe_, 14, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("fan2_gate");       return -37; }
+    if (vcu_gate.init       (gpioe_, 12, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("vcu_gate");        return -38; }
+    if (fan1_gate.init      (gpioe_, 10, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("fan1_gate");       return -39; }
+
+    /* --- Multiplexer select lines ----------------------------------------- */
+    if (mux_s1_0.init (gpioc_, 6,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s1_0");  return -50; }
+    if (mux_s1_1.init (gpiod_, 15, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s1_1");  return -51; }
+    if (mux_s2_0.init (gpiod_, 14, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s2_0");  return -52; }
+    if (mux_s2_1.init (gpiod_, 13, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s2_1");  return -53; }
+    if (mux_s3_0.init (gpiod_, 11, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s3_0");  return -54; }
+    if (mux_s3_1.init (gpiod_, 10, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s3_1");  return -55; }
+    if (mux_s4_1.init (gpioe_, 8,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s4_1");  return -56; }
+    if (mux_s4_0.init (gpioe_, 7,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("mux_s4_0");  return -57; }
+
+    /* --- Debug GPIOs ------------------------------------------------------- */
+    if (debug1.init (gpiod_, 0,  GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("debug1"); return -60; }
+    if (debug2.init (gpioc_, 12, GPIO_OUTPUT_INACTIVE) != 0) { LOG_ERR("debug2"); return -61; }
 
     LOG_INF("GPIOs initialized");
     return 0;
 }
 
+/* ========================================================================== */
+/* CAN                                                                         */
+/* ========================================================================== */
+
 int Hardware::initializeCANs()
 {
-    // Get CAN devices
-    can1_dev = DEVICE_DT_GET(DT_NODELABEL(fdcan1));
+    LOG_INF("Initializing CANs...");
 
-    if (!can1_dev)
+    can1_dev_ = DEVICE_DT_GET(DT_NODELABEL(fdcan1));
+    if (!device_is_ready(can1_dev_))
     {
-        LOG_ERR("Failed to get CAN device");
+        LOG_ERR("CAN device fdcan1 not ready");
         return -1;
     }
 
-    // Initialize CAN1 (1 Mbps)
-    if (can1.init(can1_dev, 1000000, 875) != 0)
+    if (can1.init(can1_dev_, 1000000, 875) != 0)
     {
         LOG_ERR("Failed to init CAN1");
         return -10;
@@ -208,8 +232,6 @@ int Hardware::initializeCANs()
         LOG_ERR("Failed to start CAN1");
         return -11;
     }
-
-    can1.set_mode(CAN_MODE_LOOPBACK);
 
     LOG_INF("CANs initialized");
     return 0;

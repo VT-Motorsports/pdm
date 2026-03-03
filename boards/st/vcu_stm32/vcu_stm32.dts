@@ -170,9 +170,9 @@
 			gpios = <&gpioe 8 GPIO_ACTIVE_HIGH>;
 			label = "MUX S4-1";
 		};
-		mux_sr_0: mux_sr_0 {
+		mux_s4_0: mux_s4_0 {
 			gpios = <&gpioe 7 GPIO_ACTIVE_HIGH>;
-			label = "MUX SR-0";
+			label = "MUX S4-0";
 		};
 	};
 
@@ -233,7 +233,7 @@
 		mux-s3-0 = &mux_s3_0;
 		mux-s3-1 = &mux_s3_1;
 		mux-s4-1 = &mux_s4_1;
-		mux-sr-0 = &mux_sr_0;
+		mux-s4-0 = &mux_s4_0;
 
 		/* PWM */
 		pwm-rad2   = &pwm1;  /* PE9  - TIM1_CH1 */
@@ -369,6 +369,7 @@
 /*   PC1  — I_Rad1_Prot  (ADC123_INP11)                                   */
 /*   PC4  — I_Pump1      (ADC12_INP4)                                      */
 /*   PC5  — I_1a_Limit1  (ADC12_INP8)                                     */
+/*   PC0  — I_1a_Limit2  (ADC123_INP10)                                     */
 /* ====================================================================== */
 
 &adc1 {
@@ -377,7 +378,8 @@
 	             &adc1_inp5_pb1
 	             &adc1_inp11_pc1
 	             &adc1_inp4_pc4
-	             &adc1_inp8_pc5>;
+	             &adc1_inp8_pc5
+				 &adc1_inp10_pc0>;
 	pinctrl-names = "default";
 	st,adc-clock-source = "SYNC";
 	st,adc-prescaler = <4>;
@@ -440,6 +442,15 @@
 		zephyr,resolution       = <12>;
 		zephyr,input-positive   = <8>;   /* PC5 - I_1a_Limit1 - INP8  */
 	};
+
+	channel@6 {
+		reg = <6>;
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <8>;   /* PC0 - I_1a_Limit2 - INP10  */
+	};
 };
 
 /* ====================================================================== */
@@ -496,6 +507,9 @@
 	};
 	adc1_inp8_pc5: adc1_inp8_pc5 {
 		pinmux = <STM32_PINMUX('C', 5, ANALOG)>;
+	};
+	adc1_inp10_pc0: adc1_inp10_pc0 {
+		pinmux = <STM32_PINMUX('C', 0, ANALOG)>;
 	};
 
 	/* --- ADC3 --------------------------------------------------------- */
