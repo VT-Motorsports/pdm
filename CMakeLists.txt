@@ -6,11 +6,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set_source_files_properties(src/*.cpp PROPERTIES LANGUAGE CXX)
 
-set(BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+get_filename_component(_app_root "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
+set(BOARD_ROOT "${_app_root}")
 
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(vcu)
+project(pdm)
 
 # Add include/ directory to include paths
 target_include_directories(app PRIVATE
