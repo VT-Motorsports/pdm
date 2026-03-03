@@ -189,11 +189,10 @@ int Hardware::initializeCANs()
 {
     // Get CAN devices
     can1_dev = DEVICE_DT_GET(DT_NODELABEL(fdcan1));
-    can2_dev = DEVICE_DT_GET(DT_NODELABEL(fdcan2));
 
-    if (!can1_dev || !can2_dev)
+    if (!can1_dev)
     {
-        LOG_ERR("Failed to get CAN devices");
+        LOG_ERR("Failed to get CAN device");
         return -1;
     }
 
@@ -208,19 +207,6 @@ int Hardware::initializeCANs()
     {
         LOG_ERR("Failed to start CAN1");
         return -11;
-    }
-
-    // Initialize CAN2 (1 Mbps)
-    if (can2.init(can2_dev, 1000000, 875) != 0)
-    {
-        LOG_ERR("Failed to init CAN2");
-        return -20;
-    }
-
-    if (can2.start() != 0)
-    {
-        LOG_ERR("Failed to start CAN2");
-        return -21;
     }
 
     can1.set_mode(CAN_MODE_LOOPBACK);
