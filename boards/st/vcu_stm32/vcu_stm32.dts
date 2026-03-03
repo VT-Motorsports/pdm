@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 VCU Team
+ * Copyright (c) 2025 PDM Team
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -9,18 +9,21 @@
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
 / {
-	model = "VCU STM32H753VIT6 Custom Board";
+	model = "Custom PDM STM32H753VIT6 Board";
 	compatible = "st,stm32h753vi";
 
 	chosen {
-		zephyr,console = &usart3;
+		zephyr,console    = &usart3;
 		zephyr,shell-uart = &usart3;
-		zephyr,sram = &sram0;
-		zephyr,flash = &flash0;
-		zephyr,dtcm = &dtcm;
-		zephyr,canbus = &fdcan1;
+		zephyr,sram       = &sram0;
+		zephyr,flash      = &flash0;
+		zephyr,dtcm       = &dtcm;
+		zephyr,canbus     = &fdcan1;
 	};
 
+	/* ------------------------------------------------------------------ */
+	/* Status LEDs                                                          */
+	/* ------------------------------------------------------------------ */
 	leds {
 		compatible = "gpio-leds";
 		err_led_yellow: led_0 {
@@ -45,96 +48,259 @@
 		};
 	};
 
-	vcu_signals {
+	/* ------------------------------------------------------------------ */
+	/* Power Gate Outputs                                                   */
+	/* ------------------------------------------------------------------ */
+	power_gates {
 		compatible = "gpio-leds";
-		horn_signal: horn_sig {
-			gpios = <&gpioc 8 GPIO_ACTIVE_HIGH>;
-			label = "Horn Signal";
+
+		spare_1a_gate2: spare_1a_gate2 {
+			gpios = <&gpiod 7 GPIO_ACTIVE_HIGH>;
+			label = "Spare 1A Gate 2";
 		};
-		drive_enable: drive_en {
-			gpios = <&gpioc 9 GPIO_ACTIVE_HIGH>;
-			label = "Drive Enable";
+		strain_gate: strain_gate {
+			gpios = <&gpiod 6 GPIO_ACTIVE_HIGH>;
+			label = "Strain Gate";
 		};
-		air_ctrl: air_control {
+		emeter_gate: emeter_gate {
+			gpios = <&gpiod 5 GPIO_ACTIVE_HIGH>;
+			label = "EMeter Gate";
+		};
+		bms_gate: bms_gate {
+			gpios = <&gpiod 4 GPIO_ACTIVE_HIGH>;
+			label = "BMS Gate";
+		};
+		imd_gate: imd_gate {
+			gpios = <&gpiod 3 GPIO_ACTIVE_HIGH>;
+			label = "IMD Gate";
+		};
+		sd_gate: sd_gate {
+			gpios = <&gpiod 2 GPIO_ACTIVE_HIGH>;
+			label = "SD Gate";
+		};
+		rad2_gate: rad2_gate {
+			gpios = <&gpiod 1 GPIO_ACTIVE_HIGH>;
+			label = "Rad2 Gate";
+		};
+		spare_1a_gate: spare_1a_gate {
 			gpios = <&gpioa 8 GPIO_ACTIVE_HIGH>;
-			label = "AIR Control";
+			label = "Spare 1A Gate";
+		};
+		spare_5a_gate: spare_5a_gate {
+			gpios = <&gpioc 9 GPIO_ACTIVE_HIGH>;
+			label = "Spare 5A Gate";
+		};
+		spare_5a_gate2: spare_5a_gate2 {
+			gpios = <&gpiob 15 GPIO_ACTIVE_HIGH>;
+			label = "Spare 5A Gate 2";
+		};
+		bspd_gate: bspd_gate {
+			gpios = <&gpiob 14 GPIO_ACTIVE_HIGH>;
+			label = "BSPD Gate";
+		};
+		dash_gate: dash_gate {
+			gpios = <&gpiob 13 GPIO_ACTIVE_HIGH>;
+			label = "Dash Gate";
+		};
+		pump1_gate: pump1_gate {
+			gpios = <&gpiob 12 GPIO_ACTIVE_HIGH>;
+			label = "Pump 1 Gate";
+		};
+		rad1_gate: rad1_gate {
+			gpios = <&gpiob 11 GPIO_ACTIVE_HIGH>;
+			label = "Rad 1 Gate";
+		};
+		fan4_gate: fan4_gate {
+			gpios = <&gpiob 10 GPIO_ACTIVE_HIGH>;
+			label = "Fan 4 Gate";
+		};
+		fan3_gate: fan3_gate {
+			gpios = <&gpioe 15 GPIO_ACTIVE_HIGH>;
+			label = "Fan 3 Gate";
+		};
+		fan2_gate: fan2_gate {
+			gpios = <&gpioe 14 GPIO_ACTIVE_HIGH>;
+			label = "Fan 2 Gate";
+		};
+		vcu_gate: vcu_gate {
+			gpios = <&gpioe 12 GPIO_ACTIVE_HIGH>;
+			label = "VCU Gate";
+		};
+		fan1_gate: fan1_gate {
+			gpios = <&gpioe 10 GPIO_ACTIVE_HIGH>;
+			label = "Fan 1 Gate";
+		};
+		pump2_gate: pump2_gate {
+			gpios = <&gpiob 2 GPIO_ACTIVE_HIGH>;
+			label = "Pump 2 Gate";
 		};
 	};
 
+	/* ------------------------------------------------------------------ */
+	/* Multiplexer Select Lines                                             */
+	/* ------------------------------------------------------------------ */
+	mux_selects {
+		compatible = "gpio-leds";
+
+		mux_s1_0: mux_s1_0 {
+			gpios = <&gpioc 6 GPIO_ACTIVE_HIGH>;
+			label = "MUX S1-0";
+		};
+		mux_s1_1: mux_s1_1 {
+			gpios = <&gpiod 15 GPIO_ACTIVE_HIGH>;
+			label = "MUX S1-1";
+		};
+		mux_s2_0: mux_s2_0 {
+			gpios = <&gpiod 14 GPIO_ACTIVE_HIGH>;
+			label = "MUX S2-0";
+		};
+		mux_s2_1: mux_s2_1 {
+			gpios = <&gpiod 13 GPIO_ACTIVE_HIGH>;
+			label = "MUX S2-1";
+		};
+		mux_s3_0: mux_s3_0 {
+			gpios = <&gpiod 11 GPIO_ACTIVE_HIGH>;
+			label = "MUX S3-0";
+		};
+		mux_s3_1: mux_s3_1 {
+			gpios = <&gpiod 10 GPIO_ACTIVE_HIGH>;
+			label = "MUX S3-1";
+		};
+		mux_s4_1: mux_s4_1 {
+			gpios = <&gpioe 8 GPIO_ACTIVE_HIGH>;
+			label = "MUX S4-1";
+		};
+		mux_sr_0: mux_sr_0 {
+			gpios = <&gpioe 7 GPIO_ACTIVE_HIGH>;
+			label = "MUX SR-0";
+		};
+	};
+
+	/* ------------------------------------------------------------------ */
+	/* Debug GPIOs                                                          */
+	/* ------------------------------------------------------------------ */
+	debug_signals {
+		compatible = "gpio-leds";
+
+		debug1: debug1 {
+			gpios = <&gpiod 0 GPIO_ACTIVE_HIGH>;
+			label = "Debug1";
+		};
+		debug2: debug2 {
+			gpios = <&gpioc 12 GPIO_ACTIVE_HIGH>;
+			label = "Debug2";
+		};
+	};
+
+	/* ------------------------------------------------------------------ */
+	/* Aliases                                                              */
+	/* ------------------------------------------------------------------ */
 	aliases {
+		/* LEDs */
 		led0 = &err_led_yellow;
 		led1 = &err_led_orange;
 		led2 = &err_led_red;
 		led3 = &err_led_blue;
 		led4 = &err_led_green;
-		horn = &horn_signal;
-		drive-enable = &drive_enable;
-		air-ctrl = &air_ctrl;
+
+		/* Gates */
+		spare-1a-gate2  = &spare_1a_gate2;
+		strain-gate     = &strain_gate;
+		emeter-gate     = &emeter_gate;
+		bms-gate        = &bms_gate;
+		imd-gate        = &imd_gate;
+		sd-gate         = &sd_gate;
+		rad2-gate       = &rad2_gate;
+		spare-1a-gate   = &spare_1a_gate;
+		spare-5a-gate   = &spare_5a_gate;
+		spare-5a-gate2  = &spare_5a_gate2;
+		bspd-gate       = &bspd_gate;
+		dash-gate       = &dash_gate;
+		pump1-gate      = &pump1_gate;
+		rad1-gate       = &rad1_gate;
+		fan4-gate       = &fan4_gate;
+		fan3-gate       = &fan3_gate;
+		fan2-gate       = &fan2_gate;
+		vcu-gate        = &vcu_gate;
+		fan1-gate       = &fan1_gate;
+		pump2-gate      = &pump2_gate;
+
+		/* MUX selects */
+		mux-s1-0 = &mux_s1_0;
+		mux-s1-1 = &mux_s1_1;
+		mux-s2-0 = &mux_s2_0;
+		mux-s2-1 = &mux_s2_1;
+		mux-s3-0 = &mux_s3_0;
+		mux-s3-1 = &mux_s3_1;
+		mux-s4-1 = &mux_s4_1;
+		mux-sr-0 = &mux_sr_0;
+
+		/* PWM */
+		pwm-rad2   = &pwm1;  /* PE9  - TIM1_CH1 */
+		pwm-pump1  = &pwm1;  /* PE11 - TIM1_CH2 */
+		pwm-pump2  = &pwm1;  /* PE13 - TIM1_CH4 */
+		pwm-fan1   = &pwm2;  /* PA0  - TIM2_CH1 */
+		pwm-fan2   = &pwm2;  /* PA2  - TIM2_CH3 */
+		pwm-fan3   = &pwm3;  /* PA6  - TIM3_CH1 */
+		pwm-rad1   = &pwm3;  /* PA7  - TIM3_CH2 */
+		pwm-fan4   = &pwm3;  /* PB0  - TIM3_CH3 */
 	};
 };
 
-// &clk_lse {
-// 	status = "okay";
-// };
+/* ====================================================================== */
+/* Clocks                                                                  */
+/* ====================================================================== */
 
-
-
-
-&clk_hsi {
+/* External 25 MHz crystal on PH0 (OSC_IN) / PH1 (OSC_OUT) */
+&clk_hse {
+	clock-frequency = <DT_FREQ_M(25)>;
 	status = "okay";
 };
 
 &pll {
-    div-m = <16>;     // 64 MHz / 16 = 4 MHz (same as Nucleo!)
-    mul-n = <240>;    // 4 MHz × 240 = 960 MHz VCO ✓
-    div-p = <2>;      // 960 / 2 = 480 MHz ✓
-    div-q = <2>;      // 960 / 2 = 480 MHz
-    div-r = <2>;      // 960 / 2 = 480 MHz
-    clocks = <&clk_hsi>;  // ← Changed from HSE to HSI
-    status = "okay";
+	div-m = <5>;     /* 25 MHz / 5  =   5 MHz ref             */
+	mul-n = <192>;   /*  5 MHz × 192 = 960 MHz VCO            */
+	div-p = <2>;     /* 960 / 2 = 480 MHz (SYSCLK)            */
+	div-q = <2>;     /* 960 / 2 = 480 MHz                     */
+	div-r = <2>;     /* 960 / 2 = 480 MHz                     */
+	clocks = <&clk_hse>;
+	status = "okay";
 };
 
 &pll2 {
-    div-m = <32>;     // 64 MHz / 32 = 2 MHz
-    mul-n = <120>;    // 2 MHz × 120 = 240 MHz VCO
-    div-p = <2>;      // 240 / 2 = 120 MHz
-    div-q = <3>;      // 240 / 3 = 80 MHz (for FDCAN) ✓
-    div-r = <2>;      // 240 / 2 = 120 MHz
-    clocks = <&clk_hsi>;  // ← Changed from HSE to HSI
-    status = "okay";
+	div-m = <5>;     /* 25 MHz / 5  =   5 MHz ref             */
+	mul-n = <80>;    /*  5 MHz × 80  = 400 MHz VCO            */
+	div-p = <4>;     /* 400 / 4 = 100 MHz                     */
+	div-q = <5>;     /* 400 / 5 =  80 MHz (FDCAN clock)       */
+	div-r = <4>;     /* 400 / 4 = 100 MHz                     */
+	clocks = <&clk_hse>;
+	status = "okay";
 };
 
 &rcc {
-    clocks = <&pll>;
-    clock-frequency = <DT_FREQ_M(480)>;
-    d1cpre = <1>;
-    hpre = <2>;
-    d1ppre = <2>;
-    d2ppre1 = <2>;
-    d2ppre2 = <2>;
-    d3ppre = <2>;
+	clocks = <&pll>;
+	clock-frequency = <DT_FREQ_M(480)>;
+	d1cpre  = <1>;
+	hpre    = <2>;
+	d1ppre  = <2>;
+	d2ppre1 = <2>;
+	d2ppre2 = <2>;
+	d3ppre  = <2>;
 };
 
-/* Enable GPIO ports */
-&gpioa {
-	status = "okay";
-};
+/* ====================================================================== */
+/* GPIO Ports                                                              */
+/* ====================================================================== */
 
-&gpiob {
-	status = "okay";
-};
+&gpioa { status = "okay"; };
+&gpiob { status = "okay"; };
+&gpioc { status = "okay"; };
+&gpiod { status = "okay"; };
+&gpioe { status = "okay"; };
 
-&gpioc {
-	status = "okay";
-};
-
-&gpiod {
-	status = "okay";
-};
-
-&gpioe {
-	status = "okay";
-};
+/* ====================================================================== */
+/* USART3  — PD8 TX / PD9 RX                                              */
+/* ====================================================================== */
 
 &usart3 {
 	pinctrl-0 = <&usart3_tx_pd8 &usart3_rx_pd9>;
@@ -142,6 +308,10 @@
 	current-speed = <115200>;
 	status = "okay";
 };
+
+/* ====================================================================== */
+/* FDCAN1  — PB8 RX / PB9 TX                                              */
+/* ====================================================================== */
 
 &fdcan1 {
 	clocks = <&rcc STM32_CLOCK_BUS_APB1_2 0x00000100>,
@@ -151,19 +321,63 @@
 	status = "okay";
 };
 
-&fdcan2 {
-	clocks = <&rcc STM32_CLOCK_BUS_APB1_2 0x00000200>,
-		 <&rcc STM32_SRC_PLL2_Q FDCAN_SEL(2)>;
-	pinctrl-0 = <&fdcan2_rx_pb5 &fdcan2_tx_pb6>;
-	pinctrl-names = "default";
+/* ====================================================================== */
+/* PWM                                                                     */
+/* ====================================================================== */
+
+/* TIM1 — Rad2 PWM (PE9/CH1), Pump1 PWM (PE11/CH2), Pump2 PWM (PE13/CH4) */
+&timers1 {
+	st,prescaler = <479>;  /* 480 MHz / 480 = 1 MHz timer clock */
 	status = "okay";
+
+	pwm1: pwm {
+		pinctrl-0 = <&tim1_ch1_pe9 &tim1_ch2_pe11 &tim1_ch4_pe13>;
+		pinctrl-names = "default";
+		status = "okay";
+	};
 };
 
+/* TIM2 — Fan1 PWM (PA0/CH1), Fan2 PWM (PA2/CH3) */
+&timers2 {
+	st,prescaler = <479>;
+	status = "okay";
+
+	pwm2: pwm {
+		pinctrl-0 = <&tim2_ch1_pa0 &tim2_ch3_pa2>;
+		pinctrl-names = "default";
+		status = "okay";
+	};
+};
+
+/* TIM3 — Fan3 PWM (PA6/CH1), Rad1 PWM (PA7/CH2), Fan4 PWM (PB0/CH3) */
+&timers3 {
+	st,prescaler = <479>;
+	status = "okay";
+
+	pwm3: pwm {
+		pinctrl-0 = <&tim3_ch1_pa6 &tim3_ch2_pa7 &tim3_ch3_pb0>;
+		pinctrl-names = "default";
+		status = "okay";
+	};
+};
+
+/* ====================================================================== */
+/* ADC1/2 shared channels                                                  */
+/*   PA4  — I_10A_Limit  (ADC12_INP18)                                    */
+/*   PA5  — I_5A_Limit   (ADC12_INP19)                                    */
+/*   PB1  — I_Pump2      (ADC12_INP5)                                     */
+/*   PC1  — I_Rad1_Prot  (ADC123_INP11)                                   */
+/*   PC4  — I_Pump1      (ADC12_INP4)                                      */
+/*   PC5  — I_1a_Limit1  (ADC12_INP8)                                     */
+/* ====================================================================== */
+
 &adc1 {
-	pinctrl-0 = <&adc1_inp16_pa0 &adc1_inp17_pa1 
-	             &adc1_inp14_pa2 &adc1_inp15_pa3
-	             &adc1_inp18_pa4 &adc1_inp19_pa5
-	             &adc1_inp3_pa6 &adc1_inp7_pa7>;
+	pinctrl-0 = <&adc1_inp18_pa4
+	             &adc1_inp19_pa5
+	             &adc1_inp5_pb1
+	             &adc1_inp11_pc1
+	             &adc1_inp4_pc4
+	             &adc1_inp8_pc5>;
 	pinctrl-names = "default";
 	st,adc-clock-source = "SYNC";
 	st,adc-prescaler = <4>;
@@ -175,102 +389,163 @@
 
 	channel@0 {
 		reg = <0>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <16>;  /* PA0 - INP16 */
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <18>;  /* PA4 - I_10A_Limit - INP18 */
 	};
 
 	channel@1 {
 		reg = <1>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <17>;  /* PA1 - INP17 */
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <19>;  /* PA5 - I_5A_Limit  - INP19 */
 	};
 
 	channel@2 {
 		reg = <2>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <14>;  /* PA2 - INP14 */
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <5>;   /* PB1 - I_Pump2     - INP5  */
 	};
 
 	channel@3 {
 		reg = <3>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <15>;  /* PA3 - INP15 */
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <11>;  /* PC1 - I_Rad1_Prot - INP11 */
 	};
 
 	channel@4 {
 		reg = <4>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <18>;  /* PA4 - INP18 */
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <4>;   /* PC4 - I_Pump1     - INP4  */
 	};
 
 	channel@5 {
 		reg = <5>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <19>;  /* PA5 - INP19 */
-	};
-
-	channel@6 {
-		reg = <6>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
-		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <3>;   /* PA6 - INP3 */
-	};
-
-	channel@7 {
-		reg = <7>;
-		zephyr,gain = "ADC_GAIN_1";
-		zephyr,reference = "ADC_REF_VDD_1";
-		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-		zephyr,resolution = <12>;
-		zephyr,input-positive = <7>;   /* PA7 - INP7 */
+		zephyr,resolution       = <12>;
+		zephyr,input-positive   = <8>;   /* PC5 - I_1a_Limit1 - INP8  */
 	};
 };
+
+/* ====================================================================== */
+/* ADC3                                                                    */
+/*   PC2_C — I_Rad2_Prot (ADC3_INP0)                                      */
+/* ====================================================================== */
+
+&adc3 {
+	pinctrl-0 = <&adc3_inp0_pc2c>;
+	pinctrl-names = "default";
+	st,adc-clock-source = "SYNC";
+	st,adc-prescaler = <4>;
+	vref-mv = <3300>;
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@0 {
+		reg = <0>;
+		zephyr,gain             = "ADC_GAIN_1";
+		zephyr,reference        = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution       = <16>;  /* ADC3 supports 16-bit on H7 */
+		zephyr,input-positive   = <0>;   /* PC2_C - I_Rad2_Prot - INP0 */
+	};
+};
+
+/* ====================================================================== */
+/* Custom pinctrl entries                                                  */
+/*                                                                         */
+/* ADC (ANALOG) and PWM (AF) pins not present in the included pinctrl     */
+/* dtsi are defined here.  PWM alternate functions for STM32H753:         */
+/*   TIM1 → AF1,  TIM2 → AF1,  TIM3 → AF2                                */
+/* ====================================================================== */
+
 &pinctrl {
-    adc1_inp16_pa0: adc1_inp16_pa0 {
-        pinmux = <STM32_PINMUX('A', 0, ANALOG)>;
-    };
-    adc1_inp17_pa1: adc1_inp17_pa1 {
-        pinmux = <STM32_PINMUX('A', 1, ANALOG)>;
-    };
-    adc1_inp14_pa2: adc1_inp14_pa2 {
-        pinmux = <STM32_PINMUX('A', 2, ANALOG)>;
-    };
-    adc1_inp15_pa3: adc1_inp15_pa3 {
-        pinmux = <STM32_PINMUX('A', 3, ANALOG)>;
-    };
-    adc1_inp18_pa4: adc1_inp18_pa4 {
-        pinmux = <STM32_PINMUX('A', 4, ANALOG)>;
-    };
-    adc1_inp19_pa5: adc1_inp19_pa5 {
-        pinmux = <STM32_PINMUX('A', 5, ANALOG)>;
-    };
-    adc1_inp3_pa6: adc1_inp3_pa6 {
-        pinmux = <STM32_PINMUX('A', 6, ANALOG)>;
-    };
-    adc1_inp7_pa7: adc1_inp7_pa7 {
-        pinmux = <STM32_PINMUX('A', 7, ANALOG)>;
-    };
+
+	/* --- ADC1 --------------------------------------------------------- */
+	adc1_inp18_pa4: adc1_inp18_pa4 {
+		pinmux = <STM32_PINMUX('A', 4, ANALOG)>;
+	};
+	adc1_inp19_pa5: adc1_inp19_pa5 {
+		pinmux = <STM32_PINMUX('A', 5, ANALOG)>;
+	};
+	adc1_inp5_pb1: adc1_inp5_pb1 {
+		pinmux = <STM32_PINMUX('B', 1, ANALOG)>;
+	};
+	adc1_inp11_pc1: adc1_inp11_pc1 {
+		pinmux = <STM32_PINMUX('C', 1, ANALOG)>;
+	};
+	adc1_inp4_pc4: adc1_inp4_pc4 {
+		pinmux = <STM32_PINMUX('C', 4, ANALOG)>;
+	};
+	adc1_inp8_pc5: adc1_inp8_pc5 {
+		pinmux = <STM32_PINMUX('C', 5, ANALOG)>;
+	};
+
+	/* --- ADC3 --------------------------------------------------------- */
+	/* PC2_C is the direct analog pad (no GPIO mux required)              */
+	adc3_inp0_pc2c: adc3_inp0_pc2c {
+		pinmux = <STM32_PINMUX('C', 2, ANALOG)>;
+	};
+
+	/* --- TIM1 (AF1) --------------------------------------------------- */
+	tim1_ch1_pe9: tim1_ch1_pe9 {
+		pinmux = <STM32_PINMUX('E', 9, AF1)>;
+		slew-rate = "very-high-speed";
+	};
+	tim1_ch2_pe11: tim1_ch2_pe11 {
+		pinmux = <STM32_PINMUX('E', 11, AF1)>;
+		slew-rate = "very-high-speed";
+	};
+	tim1_ch4_pe13: tim1_ch4_pe13 {
+		pinmux = <STM32_PINMUX('E', 13, AF1)>;
+		slew-rate = "very-high-speed";
+	};
+
+	/* --- TIM2 (AF1) --------------------------------------------------- */
+	tim2_ch1_pa0: tim2_ch1_pa0 {
+		pinmux = <STM32_PINMUX('A', 0, AF1)>;
+		slew-rate = "very-high-speed";
+	};
+	tim2_ch3_pa2: tim2_ch3_pa2 {
+		pinmux = <STM32_PINMUX('A', 2, AF1)>;
+		slew-rate = "very-high-speed";
+	};
+
+	/* --- TIM3 (AF2) --------------------------------------------------- */
+	tim3_ch1_pa6: tim3_ch1_pa6 {
+		pinmux = <STM32_PINMUX('A', 6, AF2)>;
+		slew-rate = "very-high-speed";
+	};
+	tim3_ch2_pa7: tim3_ch2_pa7 {
+		pinmux = <STM32_PINMUX('A', 7, AF2)>;
+		slew-rate = "very-high-speed";
+	};
+	tim3_ch3_pb0: tim3_ch3_pb0 {
+		pinmux = <STM32_PINMUX('B', 0, AF2)>;
+		slew-rate = "very-high-speed";
+	};
 };
+
+/* ====================================================================== */
+/* Flash partitions                                                        */
+/* ====================================================================== */
 
 &flash0 {
 	partitions {
@@ -296,5 +571,3 @@
 		};
 	};
 };
-
-

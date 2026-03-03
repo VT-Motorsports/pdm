@@ -1,286 +1,187 @@
-# VCU STM32H753VIT6 Board Definition - Migration Guide
+# Custom Power Distribution Module — `custom_pdm`
 
 ## Overview
-This board definition is for a custom STM32H753VIT6 (LQFP100) based VCU board, migrated from Nucleo H753ZI development.
 
-## Directory Structure
+The **Custom PDM** (Power Distribution Module) is a custom embedded controller board built around the **STM32H753VIT6** microcontroller (LQFP100 package). It is designed to manage power distribution, gate driving, current sensing, fan/pump PWM control, and CAN communication in an automotive or motorsport environment.
+
+The board exposes a CAN bus interface, SWD/SWO debug port, multiple GPIO-controlled power gates, multiplexer select lines, ADC current sensing channels, PWM motor/fan outputs, and status indicator LEDs.
+
+---
+
+## SoC / Hardware
+
+| Property        | Value                          |
+|-----------------|-------------------------------|
+| SoC             | STM32H753VIT6                 |
+| Package         | LQFP100                       |
+| Core            | ARM Cortex-M7 @ up to 480 MHz |
+| Flash           | 2 MB                          |
+| RAM             | 1 MB (including TCM)          |
+| CAN             | FDCAN (via PB8/PB9)           |
+| ADC             | ADC1/2 (12-bit), ADC3 (16-bit)|
+| Timers (PWM)    | TIM1, TIM2, TIM3              |
+| USART           | USART3                        |
+| Debug           | SWD + SWO                     |
+| Reset           | NRST, BOOT0                   |
+
+---
+
+## Supported Features
+
+| Feature               | Config          | Notes                                   |
+|-----------------------|-----------------|-----------------------------------------|
+| CAN Bus (FDCAN)       | `fdcan1`        | PB8 (RX), PB9 (TX)                      |
+| GPIO Power Gates      | `gpio`          | Multiple digital output gates (see below)|
+| PWM Outputs           | `pwm`           | TIM1, TIM2, TIM3 channels               |
+| ADC Current Sensing   | `adc`           | ADC1/2/3 channels                       |
+| USART                 | `usart3`        | PD8 (TX), PD9 (RX)                      |
+| SWD Debug             | `swd`           | PA13 (SWDIO), PA14 (SWCLK), PB3 (SWO)  |
+| Status LEDs           | `gpio`          | 5× LEDs on PE2–PE6                      |
+| MUX Select Lines      | `gpio`          | MUX S1–S4, 8 lines total                |
+
+---
+
+## Pin Mapping
+
+### Debug & Boot
+
+| Pin   | Signal  | Function          |
+|-------|---------|-------------------|
+| NRST  | NRST    | Reset             |
+| BOOT0 | BOOT0   | Boot mode select  |
+| PA13  | SWDIO   | SWD Data          |
+| PA14  | SWCLK   | SWD Clock         |
+| PB3   | SWO     | Serial Wire Output|
+| PD0   | Debug1  | GPIO debug output |
+| PC12  | Debug2  | GPIO debug output |
+
+### CAN Bus
+
+| Pin  | Signal       | Peripheral     |
+|------|--------------|----------------|
+| PB9  | CAN Transmit | FDCAN1_TX      |
+| PB8  | CAN Receive  | FDCAN1_RX      |
+
+### USART
+
+| Pin  | Signal     | Peripheral    |
+|------|------------|---------------|
+| PD8  | USART3 TX  | USART3_TX     |
+| PD9  | USART3 RX  | USART3_RX     |
+
+### PWM Outputs
+
+| Pin  | Signal        | Peripheral   |
+|------|---------------|--------------|
+| PE9  | Rad 2 PWM     | TIM1_CH1     |
+| PE11 | Pump 1 PWM    | TIM1_CH2     |
+| PE13 | Pump 2 PWM    | TIM1_CH4     |
+| PA0  | Fan 1 PWM     | TIM2_CH1     |
+| PA2  | Fan 2 PWM     | TIM2_CH3     |
+| PA6  | Fan 3 PWM     | TIM3_CH1     |
+| PA7  | Rad 1 PWM     | TIM3_CH2     |
+| PB0  | Fan 4 PWM     | TIM3_CH3     |
+
+### ADC Current Sensing
+
+| Pin    | Signal        | Peripheral       |
+|--------|---------------|------------------|
+| PB1    | I_Pump2       | ADC12_INP5       |
+| PC5    | I_1a_Limit1   | ADC12_INP8       |
+| PC4    | I_Pump1       | ADC12_INP4       |
+| PA5    | I_5A_Limit    | ADC12_INP19      |
+| PA4    | I_10A_Limit   | ADC12_INP18      |
+| PC2_C  | I_Rad2_Prot   | ADC3_INP0        |
+| PC1    | I_Rad1_Prot   | ADC123_INP11     |
+
+### Power Gate Outputs (Digital GPIO — Output)
+
+| Pin  | Signal            | Description                        |
+|------|-------------------|------------------------------------|
+| PD7  | Spare 1A Gate 2   | Spare 1 A power gate (secondary)   |
+| PD6  | Strain Gate       | Strain sensor supply gate          |
+| PD5  | EMeter Gate       | Energy meter supply gate           |
+| PD4  | BMS Gate          | Battery Management System gate     |
+| PD3  | IMD Gate          | Insulation Monitoring Device gate  |
+| PD2  | SD Gate           | Shutdown circuit gate              |
+| PD1  | Rad2 Gate         | Radiator 2 supply gate             |
+| PA8  | Spare 1A Gate     | Spare 1 A power gate (primary)     |
+| PC9  | Spare 5A Gate     | Spare 5 A power gate (primary)     |
+| PB15 | Spare 5A Gate 2   | Spare 5 A power gate (secondary)   |
+| PB14 | BSPD Gate         | Brake System Plausibility Device gate |
+| PB13 | Dash Gate         | Dashboard supply gate              |
+| PB12 | Pump 1 Gate       | Pump 1 enable gate                 |
+| PB11 | Rad 1 Gate        | Radiator 1 supply gate             |
+| PB10 | Fan 4 Gate        | Fan 4 enable gate                  |
+| PE15 | Fan 3 Gate        | Fan 3 enable gate                  |
+| PE14 | Fan 2 Gate        | Fan 2 enable gate                  |
+| PE12 | VCU Gate          | Vehicle Control Unit supply gate   |
+| PE10 | Fan 1 Gate        | Fan 1 enable gate                  |
+| PB2  | Pump 2 Gate       | Pump 2 enable gate                 |
+
+### Multiplexer Select Lines (Digital GPIO — Output)
+
+| Pin  | Signal    | Description              |
+|------|-----------|--------------------------|
+| PC6  | MUX S1-0  | MUX 1 select bit 0       |
+| PD15 | MUX S1-1  | MUX 1 select bit 1       |
+| PD14 | MUX S2-0  | MUX 2 select bit 0       |
+| PD13 | MUX S2-1  | MUX 2 select bit 1       |
+| PD11 | MUX S3-0  | MUX 3 select bit 0       |
+| PD10 | MUX S3-1  | MUX 3 select bit 1       |
+| PE8  | MUX S4-1  | MUX 4 select bit 1       |
+| PE7  | MUX SR-0  | MUX SR select bit 0      |
+
+### Status LEDs (Digital GPIO — Output)
+
+| Pin  | Signal           | Colour  |
+|------|------------------|---------|
+| PE6  | ERR_LED_GREEN    | Green   |
+| PE5  | ERR_LED_BLUE     | Blue    |
+| PE4  | ERR_LED_RED      | Red     |
+| PE3  | ERR_LED_ORANGE   | Orange  |
+| PE2  | ERR_LED_YELLOW   | Yellow  |
+
+---
+
+## Board Directory Structure
+
+When integrating this board into a Zephyr workspace, the expected directory layout is:
+
 ```
-your_vcu_repo/
-├── boards/
-│   └── st/
-│       └── vcu_stm32/
-│           ├── board.yml
-│           ├── board.cmake
-│           ├── Kconfig.vcu_stm32
-│           ├── Kconfig.defconfig
-│           ├── vcu_stm32.dts
-│           └── vcu_stm32_defconfig
-├── src/
-│   └── main.cpp
-├── CMakeLists.txt
-└── prj.conf
+boards/custom/custom_pdm/
+├── board.yml
+├── Kconfig.custom_pdm
+├── Kconfig.defconfig
+├── custom_pdm.dts
+├── custom_pdm_defconfig
+└── custom_pdm-pinctrl.dtsi
 ```
 
-## Step 1: Copy Board Files to Your Repository
+---
 
-Copy the entire `boards/st/vcu_stm32/` directory into your VCU repository:
+## Building
 
 ```bash
-# From this template directory
-cp -r boards/ /path/to/your/vcu_repo/
+west build -b custom_pdm/stm32h753vi -- path/to/your/app
 ```
 
-## Step 2: Update Your Project CMakeLists.txt
+---
 
-Modify your top-level `CMakeLists.txt` to include the BOARD_ROOT before finding Zephyr:
+## Flashing / Debugging
 
-```cmake
-cmake_minimum_required(VERSION 3.20.0)
-
-# Point Zephyr to our custom board
-set(BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
-find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(vcu)
-
-target_sources(app PRIVATE
-    src/main.cpp
-    # Add your other source files here
-)
-```
-
-## Step 3: Build with Your Custom Board
-
-```bash
-cd /path/to/your/vcu_repo
-west build -b vcu_stm32 --pristine
-```
-
-Or if not using west:
-
-```bash
-cmake -B build -DBOARD=vcu_stm32 -GNinja
-ninja -C build
-```
-
-## Step 4: Flash to Hardware
+The board exposes a standard **SWD** interface (PA13/PA14) with an additional **SWO** trace pin (PB3). Any ST-Link v2/v3 or J-Link probe may be used.
 
 ```bash
 west flash
-# or
-ninja -C build flash
+west debug
 ```
 
-## What's Configured Out of the Box
+---
 
-### Clocks
-- HSI: 64 MHz internal oscillator (no external crystal needed)
-- PLL configured for 480 MHz system clock
-- All domain clocks configured (D1, D2, D3)
+## References
 
-### Error Indicator LEDs (All Port E)
-- **Yellow LED**: PE2 (pin 1) - alias: led0
-- **Orange LED**: PE3 (pin 2) - alias: led1
-- **Red LED**: PE4 (pin 3) - alias: led2
-- **Blue LED**: PE5 (pin 4) - alias: led3
-- **Green LED**: PE6 (pin 6) - alias: led4
-
-### Control Signals
-- **HORN_SIG**: PC8 (pin 65) - alias: horn
-- **DRIVE_ENABLE**: PC9 (pin 66) - alias: drive-enable
-- **AIR_CTRL**: PA8 (pin 67) - alias: air-ctrl
-
-### CAN Buses
-- **FDCAN1**: PB9=TX (pin 96), PB8=RX (pin 95) - Primary CAN bus
-- **FDCAN2**: PB6=TX (pin 92), PB5=RX (pin 91) - Secondary CAN bus
-
-### Analog Inputs (ADC1 - 8 channels)
-- **ANALOG_CH0**: PA0 (pin 22) - ADC1_INP16
-- **ANALOG_CH1**: PA1 (pin 23) - ADC1_INP17
-- **ANALOG_CH2**: PA2 (pin 24) - ADC1_INP14
-- **ANALOG_CH3**: PA3 (pin 25) - ADC1_INP15
-- **ANALOG_CH4**: PA4 (pin 28) - ADC1_INP18
-- **ANALOG_CH5**: PA5 (pin 29) - ADC1_INP19
-- **ANALOG_CH6**: PA6 (pin 30) - ADC1_INP3
-- **ANALOG_CH7**: PA7 (pin 31) - ADC1_INP7
-
-### UART Console
-- **USART3**: PD8=TX (pin 55), PD9=RX (pin 56) @ 115200 baud
-
-### Debug Interface
-- **SWD**: PA13=SWDIO (pin 72), PA14=SWCLK (pin 76)
-- **SWO**: PB0 (pin 34) - optional trace output
-
-### Memory Layout
-- Flash: 2MB (partitioned for bootloader + dual image slots)
-- SRAM: 1MB
-- DTCM: 128KB
-- ITCM: 64KB
-
-## Customization Guide
-
-### Change Console UART
-Edit `vcu_stm32.dts`:
-```dts
-chosen {
-    zephyr,console = &usart1;  // Change to your UART
-    zephyr,shell-uart = &usart1;
-};
-
-&usart1 {
-    pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;  // Your pins
-    pinctrl-names = "default";
-    current-speed = <115200>;
-    status = "okay";
-};
-```
-
-### Add SPI Peripheral
-Edit `vcu_stm32.dts`:
-```dts
-&spi1 {
-    pinctrl-0 = <&spi1_sck_pa5 &spi1_miso_pa6 &spi1_mosi_pa7>;
-    pinctrl-names = "default";
-    cs-gpios = <&gpioa 4 GPIO_ACTIVE_LOW>;
-    status = "okay";
-    
-    your_sensor: sensor@0 {
-        compatible = "vendor,sensor";
-        reg = <0>;
-        spi-max-frequency = <1000000>;
-    };
-};
-```
-
-### Add I2C Peripheral
-Edit `vcu_stm32.dts`:
-```dts
-&i2c1 {
-    pinctrl-0 = <&i2c1_scl_pb6 &i2c1_sda_pb7>;
-    pinctrl-names = "default";
-    clock-frequency = <I2C_BITRATE_FAST>;
-    status = "okay";
-    
-    your_device: device@48 {
-        compatible = "vendor,device";
-        reg = <0x48>;
-    };
-};
-```
-
-### Enable ADC
-Edit `vcu_stm32.dts`:
-```dts
-&adc1 {
-    pinctrl-0 = <&adc1_inp0_pa0>;
-    pinctrl-names = "default";
-    st,adc-clock-source = <SYNC>;
-    st,adc-prescaler = <4>;
-    status = "okay";
-    
-    #address-cells = <1>;
-    #size-cells = <0>;
-    
-    channel@0 {
-        reg = <0>;
-        zephyr,gain = "ADC_GAIN_1";
-        zephyr,reference = "ADC_REF_INTERNAL";
-        zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
-        zephyr,resolution = <12>;
-    };
-};
-```
-
-## Pin Mapping Reference (LQFP100)
-
-Key differences from Nucleo (LQFP144):
-- Fewer GPIO pins available
-- Some alternate functions may not be accessible
-- Verify pinout in STM32H753VI datasheet before assigning
-
-### Common Peripherals (verify against your schematic):
-- USART1: PA9/PA10, PB6/PB7, etc.
-- USART2: PA2/PA3, PD5/PD6, etc.
-- USART3: PB10/PB11, PC10/PC11, PD8/PD9
-- FDCAN1: PA11/PA12, PD0/PD1, PH13/PH14
-- FDCAN2: PB5/PB6, PB12/PB13
-- SPI1: PA5/PA6/PA7, PB3/PB4/PB5
-- I2C1: PB6/PB7, PB8/PB9
-- I2C2: PB10/PB11, PF0/PF1
-
-## Bring-Up Checklist
-
-### Phase 1: Basic Boot
-- [ ] Board powers up
-- [ ] SWD connection established
-- [ ] Can flash firmware
-- [ ] Serial console outputs (verify baud rate and pins)
-
-### Phase 2: Clock Validation
-- [ ] HSE oscillating (25 MHz crystal present?)
-- [ ] PLL locked
-- [ ] System clock at expected frequency
-- [ ] UART baud rate correct (if wrong, check HSE config)
-
-### Phase 3: GPIO
-- [ ] LED toggles
-- [ ] Button reads correctly
-
-### Phase 4: CAN
-- [ ] CAN transceiver powered
-- [ ] CAN loopback works
-- [ ] CAN communication with other nodes
-
-### Phase 5: Additional Peripherals
-- [ ] SPI communication
-- [ ] I2C communication
-- [ ] ADC readings
-- [ ] Timers/PWM
-
-## Troubleshooting
-
-### Build fails with "board not found"
-- Verify `BOARD_ROOT` is set in CMakeLists.txt
-- Check directory structure matches exactly
-
-### UART outputs garbage
-- Very unlikely with HSI (internal oscillator is stable)
-- Check UART pins match your hardware
-- Verify baud rate setting (115200)
-
-### CAN not working
-- Check CAN transceiver power
-- Verify termination resistors (120Ω at each bus end)
-- Check pin assignments (FDCAN1: PB9/PB8, FDCAN2: PB6/PB5)
-- Ensure CAN bus speed configured correctly
-
-### GPIO doesn't respond
-- Pin might not exist on LQFP100 package
-- Check STM32H753VI datasheet pinout
-- Verify pinctrl settings
-
-## Next Steps
-
-1. **Verify Hardware**: Use oscilloscope/logic analyzer to confirm:
-   - HSE oscillating at 25 MHz
-   - UART TX pin activity
-   - GPIO toggling
-
-2. **Customize Pinout**: Update `vcu_stm32.dts` with your actual schematic
-
-3. **Enable VCU Peripherals**:
-   - Additional CAN buses
-   - SPI sensors (IMU, pressure, etc.)
-   - ADC for pedal position
-   - Timers for PWM outputs
-
-4. **Port Application Code**: Begin migrating your VCU application logic
-
-## Support Files
-
-The pinctrl definitions are in Zephyr's STM32 HAL:
-```
-$ZEPHYR_BASE/dts/st/h7/stm32h753zitx-pinctrl.dtsi
-```
-
-Note: This file is for LQFP144 (ZI package). Some pins referenced may not exist on LQFP100 (VI package). Always cross-reference with the STM32H753VI datasheet.
+- [STM32H753VIT6 Product Page](https://www.st.com/en/microcontrollers-microprocessors/stm32h753vi.html)
+- [STM32H7 Reference Manual (RM0433)](https://www.st.com/resource/en/reference_manual/rm0433-stm32h742-stm32h743753-and-stm32h750-value-line-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [Zephyr Board Porting Guide](https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html)
+- [STM32H7 Zephyr SoC Support](https://docs.zephyrproject.org/latest/boards/st/)
