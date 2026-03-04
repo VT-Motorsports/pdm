@@ -256,6 +256,38 @@ int PowerManager::apply_flags(const PdmFlags &flags)
     ret |= apply_one(spare_5a_2_, flags.spare_5a_2);
     return ret;
 }
+/* ========================================================================== */
+/* enable_all()                                                                */
+/* ========================================================================== */
+
+int PowerManager::enable_all()
+{
+    LOG_INF("Enabling all PROFET channels");
+
+    PdmFlags flags{};
+    flags.pump1 = 1;
+    flags.pump2 = 1;
+    flags.rad1 = 1;
+    flags.rad2 = 1;
+    flags.fan1 = 1;
+    flags.fan2 = 1;
+    flags.fan3 = 1;
+    flags.fan4 = 1;
+    flags.bspd = 1;
+    flags.dash = 1;
+    flags.vcu = 1;
+    flags.bms = 1;
+    flags.imd = 1;
+    flags.sd = 1;
+    flags.emeter = 1;
+    flags.strain = 1;
+    flags.spare_1a = 1;
+    flags.spare_1a_2 = 1;
+    flags.spare_5a = 1;
+    flags.spare_5a_2 = 1;
+
+    return apply_flags(flags);
+}
 
 /* ========================================================================== */
 /* disable_all()                                                               */

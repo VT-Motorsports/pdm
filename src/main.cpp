@@ -9,13 +9,13 @@ LOG_MODULE_REGISTER(main);
 
 int main(void)
 {
-    LOG_INF("***VCU ENTERED MAIN***");
+    LOG_INF("***PDM ENTERED MAIN***");
 
     static VehicleState vehicle;
     static Hardware hardware(&vehicle);
     static System system;
 
-    LOG_INF("=== VCU Starting ===");
+    LOG_INF("=== PDM Starting ===");
 
     if (system.init() != 0)
     {
@@ -32,7 +32,13 @@ int main(void)
     // Start the system diagnostics task (1000 ms period, priority 10).
     start_diagnostics_task(&system, &hardware, &vehicle);
 
-    LOG_INF("=== VCU Ready ===");
+    if (hardware.power_mgr.enable_all() != 0)
+    {
+        LOG_ERR("Failed to enable all profets");
+        return -3;
+    };
+
+    LOG_INF("=== PDM Ready, all PROFETs ON ===");
 
     while (1)
     {
