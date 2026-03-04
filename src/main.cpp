@@ -1,7 +1,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
-#include "APPS.h"
 #include "hardware.h"
 #include "system.h"
 #include "vehicle_state.h"
@@ -13,8 +12,8 @@ int main(void)
     LOG_INF("***VCU ENTERED MAIN***");
 
     static VehicleState vehicle;
-    static Hardware     hardware(&vehicle);
-    static System       system;
+    static Hardware hardware(&vehicle);
+    static System system;
 
     LOG_INF("=== VCU Starting ===");
 
@@ -29,9 +28,6 @@ int main(void)
         LOG_ERR("Hardware init failed!");
         return -2;
     }
-
-    // Start the APPS pedal processing task (100 ms period, priority 5).
-    start_apps_task(&vehicle, &hardware);
 
     // Start the system diagnostics task (1000 ms period, priority 10).
     start_diagnostics_task(&system, &hardware, &vehicle);

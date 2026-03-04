@@ -1,15 +1,12 @@
 #include "can.h"
-#include "dti_decoders.h"
 
 #include <zephyr/logging/log.h>
 
-#include "dti_decoders.h"
 #include "stm32h753xx.h"
 #include "vehicle_state.h"
 #include "zephyr/drivers/can.h"
 
 LOG_MODULE_REGISTER(can);
-
 
 // ============================================================================
 // Construction
@@ -52,7 +49,6 @@ int CanBus::register_handlers()
     if (dev_ == DEVICE_DT_GET(DT_NODELABEL(fdcan1)))
     {
         // ---- DTI Inverters on CAN1 ----
-
     }
     else
     {

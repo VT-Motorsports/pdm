@@ -3,7 +3,6 @@
 #include <zephyr/kernel.h>
 
 #include "vehicle_state.h"
-#include "dti_decoders.h"
 
 using frame_handler_t = void (*)(const struct can_frame *frame, volatile VehicleState *vehicle);
 

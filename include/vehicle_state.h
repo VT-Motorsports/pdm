@@ -123,7 +123,6 @@ static constexpr PEDAL_SLOPE_DIRECTION PEDAL_SLOPE_DIRECTION(uint16_t highThresh
 struct APPS_data
 {
     bool errors[APPS_ERRORS::NUM_ERRORS];
-    bool faulted;
 
     // calibration values, constexpr set at compile time
     static constexpr int pedal1_adc_channel_num = 0;
