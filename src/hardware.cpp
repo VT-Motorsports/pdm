@@ -17,11 +17,11 @@ int Hardware::init()
 {
     LOG_INF("Initializing hardware...");
 
-    if (initializeADCs() != 0)
-    {
-        LOG_ERR("Failed to initialize ADCs");
-        return -1;
-    }
+    // if (initializeADCs() != 0)
+    // {
+    //     LOG_ERR("Failed to initialize ADCs");
+    //     return -1;
+    // }
 
     if (initializeGPIOs() != 0)
     {
@@ -29,18 +29,25 @@ int Hardware::init()
         return -2;
     }
 
-    if (initializeCANs() != 0)
+    if (initializePowerManager() != 0)
     {
-        LOG_ERR("Failed to initialize CANs");
+        LOG_ERR("Failed to initialize GPIOs");
         return -3;
     }
+
+    // if (initializeCANs() != 0)
+    // {
+    //     LOG_ERR("Failed to initialize CANs");
+    //     return -3;
+    // }
 
     LOG_INF("Hardware initialized successfully");
     return 0;
 }
 
-Hardware::Hardware(VehicleState *state) : can1(state), vehicle(state)
+Hardware::Hardware(VehicleState &state)
 {
+    this->vehicle = state;
 }
 
 /* ========================================================================== */
@@ -112,18 +119,18 @@ int Hardware::initializeADCs()
     /*
      *   channel@0 (INP0): PC2_C -> I_Rad2_Prot
      */
-    adc3_dev_ = DEVICE_DT_GET(DT_NODELABEL(adc3));
-    if (!device_is_ready(adc3_dev_))
-    {
-        LOG_ERR("ADC device adc3 not ready");
-        return -2;
-    }
+    // adc3_dev_ = DEVICE_DT_GET(DT_NODELABEL(adc3));
+    // if (!device_is_ready(adc3_dev_))
+    // {
+    //     LOG_ERR("ADC device adc3 not ready");
+    //     return -2;
+    // }
 
-    if (i_rad2_prot.init(adc3_dev_, 0) != 0) /* PC2_C - INP0 */
-    {
-        LOG_ERR("Failed to init i_rad2_prot (PC2_C/INP0)");
-        return -16;
-    }
+    // if (i_rad2_prot.init(adc3_dev_, 0) != 0) /* PC2_C - INP0 */
+    // {
+    //     LOG_ERR("Failed to init i_rad2_prot (PC2_C/INP0)");
+    //     return -16;
+    // }
 
     LOG_INF("ADCs initialized");
     return 0;
@@ -290,58 +297,58 @@ int Hardware::initializeGPIOs()
     }
 
     /* --- Multiplexer select lines ----------------------------------------- */
-    if (mux_s1_0.init(gpioc_, 6, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s1_0");
-        return -50;
-    }
-    if (mux_s1_1.init(gpiod_, 15, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s1_1");
-        return -51;
-    }
-    if (mux_s2_0.init(gpiod_, 14, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s2_0");
-        return -52;
-    }
-    if (mux_s2_1.init(gpiod_, 13, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s2_1");
-        return -53;
-    }
-    if (mux_s3_0.init(gpiod_, 11, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s3_0");
-        return -54;
-    }
-    if (mux_s3_1.init(gpiod_, 10, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s3_1");
-        return -55;
-    }
-    if (mux_s4_1.init(gpioe_, 8, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s4_1");
-        return -56;
-    }
-    if (mux_s4_0.init(gpioe_, 7, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("mux_s4_0");
-        return -57;
-    }
+    // if (mux_s1_0.init(gpioc_, 6, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s1_0");
+    //     return -50;
+    // }
+    // if (mux_s1_1.init(gpiod_, 15, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s1_1");
+    //     return -51;
+    // }
+    // if (mux_s2_0.init(gpiod_, 14, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s2_0");
+    //     return -52;
+    // }
+    // if (mux_s2_1.init(gpiod_, 13, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s2_1");
+    //     return -53;
+    // }
+    // if (mux_s3_0.init(gpiod_, 11, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s3_0");
+    //     return -54;
+    // }
+    // if (mux_s3_1.init(gpiod_, 10, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s3_1");
+    //     return -55;
+    // }
+    // if (mux_s4_1.init(gpioe_, 8, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s4_1");
+    //     return -56;
+    // }
+    // if (mux_s4_0.init(gpioe_, 7, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("mux_s4_0");
+    //     return -57;
+    // }
 
     /* --- Debug GPIOs ------------------------------------------------------- */
-    if (debug1.init(gpiod_, 0, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("debug1");
-        return -60;
-    }
-    if (debug2.init(gpioc_, 12, GPIO_OUTPUT_INACTIVE) != 0)
-    {
-        LOG_ERR("debug2");
-        return -61;
-    }
+    // if (debug1.init(gpiod_, 0, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("debug1");
+    //     return -60;
+    // }
+    // if (debug2.init(gpioc_, 12, GPIO_OUTPUT_INACTIVE) != 0)
+    // {
+    //     LOG_ERR("debug2");
+    //     return -61;
+    // }
 
     LOG_INF("GPIOs initialized");
     return 0;
@@ -373,6 +380,8 @@ int Hardware::initializeCANs()
         LOG_ERR("Failed to start CAN1");
         return -11;
     }
+
+    can1.set_mode(CAN_MODE_LOOPBACK);
 
     LOG_INF("CANs initialized");
     return 0;

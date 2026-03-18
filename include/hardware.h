@@ -11,7 +11,7 @@
 class Hardware
 {
   public:
-    explicit Hardware(VehicleState *state);
+    Hardware(VehicleState &state);
     int init();
 
     /* ------------------------------------------------------------------ */
@@ -107,5 +107,5 @@ class Hardware
     /* CAN device handle */
     const device *can1_dev_{nullptr};
 
-    VehicleState *vehicle{nullptr};
+    VehicleState vehicle;
 };

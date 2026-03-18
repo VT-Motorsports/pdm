@@ -12,9 +12,7 @@ LOG_MODULE_REGISTER(can);
 // Construction
 // ============================================================================
 
-CanBus::CanBus(VehicleState *vehicle)
-    : dev_(nullptr), bitrate_(0), sample_point_(0), initialized_(false), started_(false), vehicle_(vehicle),
-      frames_rec(0), frames_sent(0)
+CanBus::CanBus() : dev_(nullptr), bitrate_(0), sample_point_(0), initialized_(false), started_(false)
 {
 }
 

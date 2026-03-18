@@ -5,8 +5,9 @@
 
 /dts-v1/;
 #include <st/h7/stm32h753Xi.dtsi>
-#include <st/h7/stm32h753zitx-pinctrl.dtsi>
+#include <st/h7/stm32h753vitx-pinctrl.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <zephyr/dt-bindings/gpio/gpio.h>
 
 / {
 	model = "Custom PDM STM32H753VIT6 Board";
@@ -251,29 +252,27 @@
 /* Clocks                                                                  */
 /* ====================================================================== */
 
-/* External 25 MHz crystal on PH0 (OSC_IN) / PH1 (OSC_OUT) */
-&clk_hse {
-	clock-frequency = <DT_FREQ_M(25)>;
+&clk_hsi {
 	status = "okay";
 };
 
 &pll {
-	div-m = <5>;     /* 25 MHz / 5  =   5 MHz ref             */
-	mul-n = <192>;   /*  5 MHz × 192 = 960 MHz VCO            */
+	div-m = <16>;    /* 64 MHz / 16 =   4 MHz ref             */
+	mul-n = <240>;   /*  4 MHz × 240 = 960 MHz VCO            */
 	div-p = <2>;     /* 960 / 2 = 480 MHz (SYSCLK)            */
 	div-q = <2>;     /* 960 / 2 = 480 MHz                     */
 	div-r = <2>;     /* 960 / 2 = 480 MHz                     */
-	clocks = <&clk_hse>;
+	clocks = <&clk_hsi>;
 	status = "okay";
 };
 
 &pll2 {
-	div-m = <5>;     /* 25 MHz / 5  =   5 MHz ref             */
-	mul-n = <80>;    /*  5 MHz × 80  = 400 MHz VCO            */
-	div-p = <4>;     /* 400 / 4 = 100 MHz                     */
-	div-q = <5>;     /* 400 / 5 =  80 MHz (FDCAN clock)       */
-	div-r = <4>;     /* 400 / 4 = 100 MHz                     */
-	clocks = <&clk_hse>;
+	div-m = <32>;    /* 64 MHz / 32 =   2 MHz ref             */
+	mul-n = <120>;   /*  2 MHz × 120 = 240 MHz VCO            */
+	div-p = <2>;     /* 240 / 2 = 120 MHz                     */
+	div-q = <3>;     /* 240 / 3 =  80 MHz (FDCAN clock)       */
+	div-r = <2>;     /* 240 / 2 = 120 MHz                     */
+	clocks = <&clk_hsi>;
 	status = "okay";
 };
 
@@ -287,6 +286,7 @@
 	d2ppre2 = <2>;
 	d3ppre  = <2>;
 };
+
 
 /* ====================================================================== */
 /* GPIO Ports                                                              */

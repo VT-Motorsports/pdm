@@ -1,18 +1,27 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "VCU STM32H753 Debug",
-            "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/zephyr/zephyr.elf",
-            "request": "launch",
-            "type": "cortex-debug",
-            "runToEntryPoint": "main",
-            "servertype": "stlink",
-            "device": "STM32H753VI",
-            "interface": "swd",
-            "armToolchainPath": "C:/FORMULA/Code/VCU/vcu_codebase/zephyr-sdk/zephyr-sdk-0.16.5-1/arm-zephyr-eabi/bin",
-            "gdbPath": "C:/FORMULA/Code/VCU/vcu_codebase/zephyr-sdk/zephyr-sdk-0.16.5-1/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb.exe"
-        }
-    ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+"name": "VCU STM32H753 Debug",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "device": "STM32H753VI",
+            "interface": "swd",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32h7x.cfg"
+            ],
+            "openOCDLaunchCommands": [
+                "reset_config srst_only connect_assert_srst",
+                "init",
+                "reset halt"
+            ],
+            "armToolchainPath": "C:/zephyr-sdk-0.16.5-1/arm-zephyr-eabi/bin",
+            "gdbPath": "C:/zephyr-sdk-0.16.5-1/arm-zephyr-eabi/bin/arm-zephyr-eabi-gdb.exe"
+        }
+    ]
 }

@@ -26,7 +26,7 @@ class CanBus
     frame_handler_t bus_handlers[2048]{nullptr};
 
   public:
-    CanBus(VehicleState *vehicle);
+    CanBus();
 
     int init(const struct device *dev, uint32_t bitrate = 1000000, uint32_t sample_point = 875);
     int start();
