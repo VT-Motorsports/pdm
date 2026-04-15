@@ -4,6 +4,7 @@
 #include "hardware.h"
 #include "system.h"
 #include "vehicle_state.h"
+#include "pwm_controller.h"
 
 LOG_MODULE_REGISTER(main);
 
@@ -88,6 +89,8 @@ int main(void)
     static System system;
     LOG_INF("=== PDM Starting ===");
 
+    PwmController *pwm = startPwmController(20);
+
     if (system.init() != 0)
     {
         LOG_ERR("System init failed!");
@@ -119,15 +122,6 @@ int main(void)
 
     while (1)
     {
-        // if (on)
-        // {
-        //     hardware.power_mgr.disable_all();
-        // }
-        // if (!on)
-        // {
-        //     hardware.power_mgr.enable_all();
-        // }
-        on = !on;
         hardware.led_green.toggle();
         send_heartbeat(hardware);
         LOG_INF("LED BLINKING");

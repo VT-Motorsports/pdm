@@ -193,6 +193,19 @@
 		};
 	};
 
+	pwm_outputs {
+		compatible = "pwm-leds";
+
+		pwm_out_rad2:  pwm_rad2  { pwms = <&pwm1 1 2000000 0>; };  /* 500Hz  = 2,000,000ns */
+		pwm_out_pump1: pwm_pump1 { pwms = <&pwm1 2 2000000 0>; };  /* 500Hz  = 2,000,000ns */
+		pwm_out_pump2: pwm_pump2 { pwms = <&pwm1 4 2000000 0>; };  /* 500Hz  = 2,000,000ns */
+		pwm_out_fan1:  pwm_fan1  { pwms = <&pwm2 1 40000   0>; };  /* 25kHz  = 40,000ns    */
+		pwm_out_fan2:  pwm_fan2  { pwms = <&pwm2 3 40000   0>; };  /* 25kHz  = 40,000ns    */
+		pwm_out_fan3:  pwm_fan3  { pwms = <&pwm3 1 40000   0>; };  /* 25kHz  = 40,000ns    */
+		pwm_out_rad1:  pwm_rad1  { pwms = <&pwm3 2 40000   0>; };  /* 25kHz  = 40,000ns    */
+		pwm_out_fan4:  pwm_fan4  { pwms = <&pwm3 3 40000   0>; };  /* 25kHz  = 40,000ns    */
+    	};
+
 	/* ------------------------------------------------------------------ */
 	/* Aliases                                                              */
 	/* ------------------------------------------------------------------ */
@@ -237,14 +250,15 @@
 		mux-s4-0 = &mux_s4_0;
 
 		/* PWM */
-		pwm-rad2   = &pwm1;  /* PE9  - TIM1_CH1 */
-		pwm-pump1  = &pwm1;  /* PE11 - TIM1_CH2 */
-		pwm-pump2  = &pwm1;  /* PE13 - TIM1_CH4 */
-		pwm-fan1   = &pwm2;  /* PA0  - TIM2_CH1 */
-		pwm-fan2   = &pwm2;  /* PA2  - TIM2_CH3 */
-		pwm-fan3   = &pwm3;  /* PA6  - TIM3_CH1 */
-		pwm-rad1   = &pwm3;  /* PA7  - TIM3_CH2 */
-		pwm-fan4   = &pwm3;  /* PB0  - TIM3_CH3 */
+		pwm-rad2  = &pwm_out_rad2;
+		pwm-pump1 = &pwm_out_pump1;
+		pwm-pump2 = &pwm_out_pump2;
+		pwm-fan1  = &pwm_out_fan1;
+		pwm-fan2  = &pwm_out_fan2;
+		pwm-fan3  = &pwm_out_fan3;
+		pwm-rad1  = &pwm_out_rad1;
+		pwm-fan4  = &pwm_out_fan4;
+
 	};
 };
 
@@ -360,6 +374,7 @@
 		status = "okay";
 	};
 };
+
 
 /* ====================================================================== */
 /* ADC1/2 shared channels                                                  */
