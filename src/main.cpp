@@ -89,8 +89,6 @@ int main(void)
     static System system;
     LOG_INF("=== PDM Starting ===");
 
-    PwmController *pwm = startPwmController(20);
-
     if (system.init() != 0)
     {
         LOG_ERR("System init failed!");
@@ -115,6 +113,8 @@ int main(void)
         LOG_ERR("Failed to start diagnostics!");
         return -3;
     }
+
+    PwmController *pwm = startPwmController(20);
 
     LOG_INF("=== PDM Ready, all PROFETs ON ===");
 

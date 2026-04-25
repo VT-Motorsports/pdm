@@ -115,7 +115,7 @@ void PwmController::run()
     }
 
     // Initial duty cycle
-    setAll(global_duty);
+    setAll(80);
 
     while (true)
     {
